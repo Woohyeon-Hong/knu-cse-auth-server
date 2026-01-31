@@ -8,27 +8,15 @@ import org.junit.jupiter.api.Test;
 
 class DuesTest {
 
-    @DisplayName("Student dues are valid when remaining semesters exist.")
+    @DisplayName("Dues are created with the student dues payment status set to false.")
     @Test
-    void isValid() {
+    void of() {
         assertThat(
                 Dues.of(
                         1L,
-                        "test",
-                        10000,
-                        4,
-                        LocalDateTime.now()
-                ).isValid()
-        ).isTrue();
-
-        assertThat(
-                Dues.of(
-                        1L,
-                        "test",
-                        10000,
-                        0,
-                        LocalDateTime.now()
-                ).isValid()
+                        "2022111111",
+                        "4"
+                ).isPaid()
         ).isFalse();
     }
 }

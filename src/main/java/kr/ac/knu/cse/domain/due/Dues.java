@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import kr.ac.knu.cse.global.base.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,7 +21,6 @@ import lombok.NoArgsConstructor;
 | --- | --- | --- |
 | id | Long | PK, column name `dues_id` |
 | studentId | Long | FK, column name `student_id` |
-| depositorName | String | Depositor name, max 50 characters |
 | amount | int | Paid amount |
 | remainingSemesters | int | Remaining valid semesters |
 | submittedAt | LocalDateTime | Dues payment timestamp |
@@ -51,38 +49,28 @@ public class Dues extends BaseTimeEntity {
 
     @Column(name = "student_id", nullable = false)
     private Long studentId;
-
-    @Column(name = "depositor_name", nullable = false, length = 50)
-    private String depositorName;
-
-    @Column(name = "amount", nullable = false)
-    private int amount;
-
-    @Column(name = "remaining_semesters", nullable = false)
-    private int remainingSemesters;
-
-    @Column(name = "submitted_at", nullable = false)
-    private LocalDateTime submittedAt;
+    @Column(name = "student_number", nullable = false, length = 15)
+    private String studentNumber;
+    @Column(name = "semesters", nullable = false, length = 15)
+    private String semesters;
+    @Column(name = "is_paid", nullable = false)
+    private boolean isPaid;
 
     public static Dues of(
             Long studentId,
-            String depositorName,
-            int amount,
-            int remainingSemesters,
-            LocalDateTime submittedAt
+            String studentNumber,
+            String semesters
     ) {
         return new Dues(
                 null,
                 studentId,
-                depositorName,
-                amount,
-                remainingSemesters,
-                submittedAt
+                studentNumber,
+                semesters,
+                false
         );
     }
 
-    public boolean isValid() {
-        return remainingSemesters >= MIN_VALID_REMAINING_SEMESTERS;
+    public void pay() {
+        this.isPaid = true;
     }
-
 }

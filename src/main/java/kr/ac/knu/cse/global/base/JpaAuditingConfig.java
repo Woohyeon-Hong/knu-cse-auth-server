@@ -1,9 +1,7 @@
-package kr.ac.knu.cse.config;
+package kr.ac.knu.cse.global.base;
 
-import com.querydsl.core.annotations.Config;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@Config
 @EnableJpaAuditing
 public class JpaAuditingConfig {
 }

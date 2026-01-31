@@ -4,10 +4,8 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import kr.ac.knu.cse.application.auth.dto.OAuthLoginResult;
 import kr.ac.knu.cse.application.auth.dto.OAuthUserInfo;
-import kr.ac.knu.cse.domain.authorization.AuthorizationPolicy;
 import kr.ac.knu.cse.domain.provider.Provider;
 import kr.ac.knu.cse.domain.provider.ProviderRepository;
-import kr.ac.knu.cse.domain.role.RoleType;
 import kr.ac.knu.cse.domain.student.Student;
 import kr.ac.knu.cse.domain.student.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +23,14 @@ public class OAuthLoginService {
 
     private final ProviderRepository providerRepository;
     private final StudentRepository studentRepository;
-    private final AuthorizationPolicy authorizationPolicy;
 
     public OAuthLoginResult login(OAuthUserInfo userInfo) {
         Provider provider = findProvider(userInfo)
                 .orElseGet(() -> createNewUser(userInfo));
 
         Student student = findStudentOf(provider);
-        RoleType role = authorizationPolicy.calculate(student);
 
-        return new OAuthLoginResult(student.getId(), role);
+        return new OAuthLoginResult(student.getId());
     }
 
     private Optional<Provider> findProvider(OAuthUserInfo userInfo) {
@@ -54,6 +50,9 @@ public class OAuthLoginService {
                 userInfo.getProviderKey(),
                 student.getId()
         );
+
+        System.out.println(provider.getStudentId());
+
         providerRepository.save(provider);
 
         return provider;
@@ -63,7 +62,9 @@ public class OAuthLoginService {
         for (int i = 0; i < MAX_RETRY; i++) {
             try {
                 Student student = Student.of(name, generateTempStudentNumber());
-                return studentRepository.save(student);
+                studentRepository.save(student);
+                System.out.println(student.getStudentNumber());
+                return student;
             } catch (DataIntegrityViolationException e) {
                 if (i == MAX_RETRY - 1) {
                     throw new IllegalStateException(

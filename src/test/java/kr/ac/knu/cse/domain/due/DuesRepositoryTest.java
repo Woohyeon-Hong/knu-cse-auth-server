@@ -1,10 +1,8 @@
 package kr.ac.knu.cse.domain.due;
 
-import static kr.ac.knu.cse.domain.due.Dues.MIN_VALID_REMAINING_SEMESTERS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.EntityManager;
-import java.time.LocalDateTime;
 import kr.ac.knu.cse.support.JpaIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,27 +16,26 @@ class DuesRepositoryTest {
     @Autowired
     EntityManager em;
 
-    @DisplayName("Returns true when the remaining semesters meet or exceed the required threshold.")
+    @DisplayName("Returns true when the student's is paid")
     @Test
-    void existsByStudentIdAndRemainingSemestersGreaterThanEqual() {
+    void existsByStudentIdAndIsPaidTrue() {
         //given
-        duesRepository.save(Dues.of(
+        Dues dues = Dues.of(
                 1L,
-                "name",
-                10000,
-                1,
-                LocalDateTime.now())
+                "2022111111",
+                "4"
         );
+
+        dues.pay();
+
+        duesRepository.save(dues);
 
         em.flush();
         em.clear();
 
         //when && then
         assertThat(
-                duesRepository.existsByStudentIdAndRemainingSemestersGreaterThanEqual(
-                        1L,
-                        MIN_VALID_REMAINING_SEMESTERS
-                )
-        ).isTrue();
+                duesRepository.existsByStudentIdAndIsPaidTrue(1L))
+                .isTrue();
     }
 }

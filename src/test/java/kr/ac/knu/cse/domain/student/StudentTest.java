@@ -41,4 +41,15 @@ class StudentTest {
         //when && then
         assertThat(student.hasConfirmedStudentNumber()).isTrue();
     }
+
+    @DisplayName("Returns true when a grade is provided.")
+    @Test
+    void hasConfirmedGrade() {
+        //given
+        Student student = Student.of("이름", "TEMP12345678910");
+        student.replaceGrade("2");
+
+        //when && then
+        assertThat(student.hasConfirmedGrade()).isTrue();
+    }
 }

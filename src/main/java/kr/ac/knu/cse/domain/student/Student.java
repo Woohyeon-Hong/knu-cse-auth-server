@@ -33,6 +33,7 @@ import lombok.NoArgsConstructor;
 | major | String | Major, max 50 characters |
 | name | String | Name, max 50 characters |
 | studentNumber | String | Student number, max 15 characters, unique |
+| grade | String | grade, max 15 characters |
 | createdAt | LocalDateTime | Creation timestamp |
 | updatedAt | LocalDateTime | Last modified timestamp |
 
@@ -70,6 +71,8 @@ public class Student extends BaseTimeEntity {
     private String name;
     @Column(name = "student_number", nullable = false, length = 15, unique = true)
     private String studentNumber;
+    @Column(name = "grade", nullable = false, length = 15)
+    private String grade;
 
     public static Student of(
             String name,
@@ -80,7 +83,8 @@ public class Student extends BaseTimeEntity {
                 ROLE_USER,
                 "UNKNOWN",
                 name,
-                studentNumber
+                studentNumber,
+                "UNKNOWN"
         );
     }
 
@@ -100,8 +104,12 @@ public class Student extends BaseTimeEntity {
         this.major = major;
     }
 
-    public void  replaceStudentNumber(String studentNumber) {
+    public void replaceStudentNumber(String studentNumber) {
         this.studentNumber = studentNumber;
+    }
+
+    public void replaceGrade(String grade) {
+        this.grade = grade;
     }
 
     public boolean hasConfirmedMajor() {
@@ -110,5 +118,8 @@ public class Student extends BaseTimeEntity {
 
     public boolean hasConfirmedStudentNumber() {
         return !studentNumber.startsWith("TEMP");
+    }
+    public boolean hasConfirmedGrade() {
+        return !studentNumber.equals("UNKNWON");
     }
 }

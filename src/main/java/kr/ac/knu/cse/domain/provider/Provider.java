@@ -73,7 +73,7 @@ public class Provider extends BaseTimeEntity {
     private String providerName;
     @Column(name = "provider_key", nullable = false, length = 255)
     private String providerKey;
-    @Column(name = "student_id", nullable = false)
+    @Column(name = "student_id")
     private Long studentId;
 
     public static Provider of(

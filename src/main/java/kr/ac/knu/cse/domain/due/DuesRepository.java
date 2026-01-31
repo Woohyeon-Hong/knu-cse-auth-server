@@ -4,8 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DuesRepository extends JpaRepository<Dues, Long> {
 
-    boolean existsByStudentIdAndRemainingSemestersGreaterThanEqual(
-            Long studentId,
-            int remainingSemesters
-    );
+    boolean existsByStudentIdAndIsPaidTrue(Long studentId);
 }
