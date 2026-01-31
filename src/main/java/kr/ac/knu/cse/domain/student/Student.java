@@ -20,33 +20,34 @@ import lombok.NoArgsConstructor;
 /*
 ### Student
 
-### 매핑 테이블
+### Mapping Table
 
 `student`
 
-### 필드
+### Fields
 
-| 필드명 | 타입 | 설명 |
+| Field Name | Type | Description |
 | --- | --- | --- |
-| id | Long | PK, 컬럼명 `student_id` |
-| role | RoleType | 최상위 조직 권한 |
-| major | String | 전공, 최대 50자 |
-| name | String | 이름, 최대 50자 |
-| studentNumber | String | 학번, 최대 15자, 유니크 |
-| createdAt | LocalDateTime | 생성 시각 |
-| updatedAt | LocalDateTime | 수정 시각 |
+| id | Long | PK, column name `student_id` |
+| role | RoleType | Top-level organizational role |
+| major | String | Major, max 50 characters |
+| name | String | Name, max 50 characters |
+| studentNumber | String | Student number, max 15 characters, unique |
+| createdAt | LocalDateTime | Creation timestamp |
+| updatedAt | LocalDateTime | Last modified timestamp |
 
-### 제약 조건
+### Constraints
 
-- `student_number`는 시스템 전역에서 유니크하다.
-- 계정 상태(status) 개념은 포함하지 않는다.
+- `student_number` is unique across the entire system.
+- The concept of account status is not included.
 
-### 역할 및 책임
+### Roles and Responsibilities
 
-- Student는 **조직 내 최상위 권한 상태만 저장**한다.
-- `ROLE_MEMBER`는 Student에 저장하지 않는다.
-- Provider와의 관계는 Provider가 `student_id`를 보유함으로써 표현된다.
- */
+- Student stores **only the top-level organizational role**.
+- `ROLE_MEMBER` is not stored in Student.
+- The relationship with Provider is expressed by Provider holding `student_id`.
+*/
+
 @Getter
 @EqualsAndHashCode(callSuper = false)
 @Entity
@@ -83,6 +84,10 @@ public class Student extends BaseTimeEntity {
         );
     }
 
+    public void assignTempIdForTest() {
+        this.id = 1L;
+    }
+
     public void grantRole(RoleType role) {
         this.role = role;
     }
@@ -104,6 +109,6 @@ public class Student extends BaseTimeEntity {
     }
 
     public boolean hasConfirmedStudentNumber() {
-        return !studentNumber.contains("@");
+        return !studentNumber.startsWith("TEMP");
     }
 }

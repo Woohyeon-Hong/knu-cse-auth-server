@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class StudentTest {
 
-    @DisplayName("이름과 학번을 입력받아, ROLE_USER 권한을 가진 학생을 생성한다.")
+    @DisplayName("Creates a student with ROLE_USER when name and student number are provided.")
     @Test
     void of() {
         //given && when
@@ -20,7 +20,7 @@ class StudentTest {
         assertThat(student.getMajor()).isEqualTo("UNKNOWN");
     }
 
-    @DisplayName("전공이 입력된 경우, true를 반환한다.")
+    @DisplayName("Returns true when a major is provided.")
     @Test
     void hasConfirmedMajor() {
         //given
@@ -31,11 +31,11 @@ class StudentTest {
         assertThat(student.hasConfirmedMajor()).isTrue();
     }
 
-    @DisplayName("학번이 입력된 경우, true를 반환한다.")
+    @DisplayName("Returns true when a student number is provided.")
     @Test
     void hasConfirmedStudentNumber() {
         //given
-        Student student = Student.of("이름", "test@knu.ac.kr");
+        Student student = Student.of("이름", "TEMP12345678910");
         student.replaceStudentNumber("2022111111");
 
         //when && then

@@ -35,7 +35,7 @@ class ProviderRepositoryTest {
         flushAndClear();
     }
 
-    @DisplayName("계정을 생성할 때 (provider_name, provider_key) 쌍이 중복되면, DB 반영 시점에 예외가 발생한다.")
+    @DisplayName("Throws an exception at persistence time when the (provider name, provider key) pair is duplicated.")
     @Test
     void of() {
         //given
@@ -67,7 +67,7 @@ class ProviderRepositoryTest {
         });
     }
 
-    @DisplayName("providerName과 providerKey를 통해 계정을 조회한다.")
+    @DisplayName("Finds an account by provider name and provider key.")
     @Test
     void findByProviderNameAndProviderKey() {
         //given
@@ -92,7 +92,7 @@ class ProviderRepositoryTest {
         assertThat(result.get()).isEqualTo(saved);
     }
 
-    @DisplayName("학번으로 학생 계정을 조회한다.")
+    @DisplayName("Finds a student account by student number.")
     @Test
     void findAllByStudentId() {
         //given

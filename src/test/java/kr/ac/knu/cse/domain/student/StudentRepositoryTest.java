@@ -24,7 +24,7 @@ class StudentRepositoryTest {
         em.clear();
     }
 
-    @DisplayName("학생을 생성할 때 학번이 중복되면, DB 반영 시점에 예외가 발생한다.")
+    @DisplayName("Throws an exception at persistence time when creating a student with a duplicate student number.")
     @Test
     void of() {
         //given
@@ -43,7 +43,7 @@ class StudentRepositoryTest {
         });
     }
 
-    @DisplayName("학번을 기반으로 학생을 조회한다.")
+    @DisplayName("Finds a student by student number.")
     @Test
     void findByStudentNumber() {
         //given
@@ -61,7 +61,7 @@ class StudentRepositoryTest {
         assertThat(result.get()).isEqualTo(saved);
     }
 
-    @DisplayName("해당 학번을 가지는 학생이 있으면, true를 반환한다.")
+    @DisplayName("Returns true if a student with the given student number exists.")
     @Test
     void existsByStudentNumber() {
         //given

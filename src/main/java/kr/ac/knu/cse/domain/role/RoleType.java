@@ -9,14 +9,14 @@ package kr.ac.knu.cse.domain.role;
 - `ROLE_ADMIN`
 - `ROLE_MEMBER`
 
-> ROLE_MEMBER는 저장되는 권한이 아니라,
+> ROLE_MEMBER is not a persisted role.
 >
+> It is a **derived role** calculated in the AuthorizationPolicy
+> based on the Dues status.
 >
-> Dues 상태를 기반으로 AuthorizationPolicy에서 계산되는 **파생 권한**이다.
->
-> 계산 결과는 토큰에만 포함된다.
->
- */
+> The calculated result is included only in the token.
+*/
+
 
 public enum RoleType {
     ROLE_USER,

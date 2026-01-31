@@ -16,35 +16,36 @@ import lombok.NoArgsConstructor;
 /*
 ### Provider
 
-### 매핑 테이블
+### Mapping Table
 
 `provider`
 
-### 필드
+### Fields
 
-| 필드명 | 타입 | 설명 |
+| Field Name | Type | Description |
 | --- | --- | --- |
-| id | Long | PK, 컬럼명 `provider_id` |
-| email | String | Provider 기준 이메일, 유니크 |
-| providerName | String | 인증 제공자 이름 (예: GOOGLE) |
-| providerKey | String | Provider 내부 사용자 식별자 |
-| studentId | Long | FK, 컬럼명 `student_id`, NULL 허용 |
-| createdAt | LocalDateTime | 생성 시각 |
-| updatedAt | LocalDateTime | 수정 시각 |
+| id | Long | PK, column name `provider_id` |
+| email | String | Provider-based email, unique |
+| providerName | String | Authentication provider name (e.g., GOOGLE) |
+| providerKey | String | User identifier within the provider |
+| studentId | Long | FK, column name `student_id`, nullable |
+| createdAt | LocalDateTime | Creation timestamp |
+| updatedAt | LocalDateTime | Last modified timestamp |
 
-### 제약 조건
+### Constraints
 
-- `email`은 유니크하다.
-- `student_id`는 NULL 허용이다.
-- Student 삭제 시 Provider의 `student_id`는 NULL로 설정된다.
+- `email` is unique.
+- `student_id` is nullable.
+- When a Student is deleted, Provider.`student_id` is set to NULL.
 
-### 역할 및 책임
+### Roles and Responsibilities
 
-- Provider는 **외부 인증 계정(OAuth 계정)을 표현하는 엔티티**다.
-- Provider는 Student와 **느슨하게 연결**된다.
-- 인증 계정은 존재하지만, 내부 사용자(Student)와 아직 연결되지 않은 상태를 허용한다.
-- Provider는 **OAuth 인증 식별 정보(email, providerKey)를 보관**한다.
- */
+- Provider represents an **external authentication account (OAuth account)**.
+- Provider is **loosely coupled** with Student.
+- An authentication account may exist without being linked to an internal user (Student).
+- Provider stores **OAuth identification information** (email, providerKey).
+*/
+
 @Getter
 @EqualsAndHashCode(callSuper = false)
 @Entity

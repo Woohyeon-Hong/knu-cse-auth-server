@@ -16,23 +16,24 @@ import lombok.NoArgsConstructor;
 /*
 ### Dues
 
-**매핑 테이블**: `dues`
+**Mapping Table**: `dues`
 
-| 필드 | 타입 | 설명 |
+| Field | Type | Description |
 | --- | --- | --- |
-| id | Long | PK, 컬럼명 `dues_id` |
-| studentId | Long | FK, 컬럼명 `student_id` |
-| depositorName | String | 납부자 이름, 최대 50자 |
-| amount | int | 납부 금액 |
-| remainingSemesters | int | 남은 유효 학기 수 |
-| submittedAt | LocalDateTime | 회비 납부 시각 |
+| id | Long | PK, column name `dues_id` |
+| studentId | Long | FK, column name `student_id` |
+| depositorName | String | Depositor name, max 50 characters |
+| amount | int | Paid amount |
+| remainingSemesters | int | Remaining valid semesters |
+| submittedAt | LocalDateTime | Dues payment timestamp |
 
-### 역할
+### Role
 
-- Dues는 `ROLE_MEMBER` 권한 판단의 **유일한 근거 데이터**다.
-- `ROLE_MEMBER` 값 자체는 DB에 저장하지 않는다.
-- `AuthorizationPolicy`에서 Dues 상태를 기반으로 `ROLE_MEMBER`를 계산한다.
- */
+- Dues is the **sole source of truth** for determining the `ROLE_MEMBER` role.
+- The `ROLE_MEMBER` value itself is not stored in the database.
+- `AuthorizationPolicy` calculates `ROLE_MEMBER` based on the Dues status.
+*/
+
 @Getter
 @EqualsAndHashCode(callSuper = false)
 @Entity

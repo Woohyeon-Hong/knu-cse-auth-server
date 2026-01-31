@@ -8,6 +8,23 @@ import kr.ac.knu.cse.domain.student.Student;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+/*
+## AuthorizationPolicy
+
+### Meaning
+
+The AuthorizationPolicy domain calculates the final effective roles of a user
+by taking the Student and Dues domains as input.
+This domain does not persist data and contains only pure rules and calculation logic.
+
+### Responsibilities
+
+- Applies hierarchical role rules based on the organizational role (Student).
+- Determines whether `ROLE_MEMBER` should be granted based on the Dues status.
+- Calculates the final set of usable roles.
+- Does not persist calculation results; roles are recalculated whenever needed.
+*/
+
 @Component
 @RequiredArgsConstructor
 public class AuthorizationPolicy {
@@ -19,7 +36,6 @@ public class AuthorizationPolicy {
 
         boolean isMember = isMember(student);
 
-        // 조직 권한이 USER일 때만 MEMBER로 승격
         if (isMember && baseRole == RoleType.ROLE_USER) {
             return RoleType.ROLE_MEMBER;
         }

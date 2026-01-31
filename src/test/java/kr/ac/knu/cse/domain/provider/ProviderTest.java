@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 class ProviderTest {
 
-    @DisplayName("provider_name, provider_key, email을 입력받아 Provider를 생성한다.")
+    @DisplayName("Creates a Provider with provider name, provider key, and email.")
     @Test
     void of() {
         //given && when

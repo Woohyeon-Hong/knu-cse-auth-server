@@ -2,7 +2,6 @@ package kr.ac.knu.cse.domain.authorization;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
@@ -26,7 +25,7 @@ class AuthorizationPolicyTest {
     @InjectMocks
     private AuthorizationPolicy authorizationPolicy;
 
-    @DisplayName("학생회비를 납부하지 않았으면, ROLE_USER 권한을 가진다.")
+    @DisplayName("Has ROLE_USER when student dues have not been paid.")
     @Test
     void userWithoutDues_remainsUser() {
         // given
@@ -47,7 +46,7 @@ class AuthorizationPolicyTest {
         assertThat(result).isEqualTo(RoleType.ROLE_USER);
     }
 
-    @DisplayName("학생회비를 납부했으면, ROLE_MEMBER 권한을 가진다.")
+    @DisplayName("Has ROLE_MEMBER when student dues have been paid.")
     @Test
     void userWithDues_becomesMember() {
         // given
@@ -67,7 +66,7 @@ class AuthorizationPolicyTest {
         assertThat(result).isEqualTo(RoleType.ROLE_MEMBER);
     }
 
-    @DisplayName("집행부는 ROLE_EXEC 권한을 가진다.")
+    @DisplayName("Executives have the ROLE_EXEC role.")
     @Test
     void execWithDues_remainsExec() {
         // given
@@ -88,7 +87,7 @@ class AuthorizationPolicyTest {
         assertThat(result).isEqualTo(RoleType.ROLE_EXEC);
     }
 
-    @DisplayName("시스템 최고 관리자는 ROLE_ADMIN 권한을 가진다.")
+    @DisplayName("The system super administrator has the ROLE_ADMIN role.")
     @Test
     void adminWithDues_remainsAdmin() {
         // given
