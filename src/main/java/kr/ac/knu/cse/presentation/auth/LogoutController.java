@@ -4,16 +4,14 @@ import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 import jakarta.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,9 +27,12 @@ public class LogoutController {
 
     @Value("${keycloak.post-logout-redirect-uri}")
     private String postLogoutRedirectUri;
+    @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
+    private String clientId;
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response)  {
+
         deleteAccessTokenCookie(response);
         SecurityContextHolder.clearContext();
 
@@ -56,14 +57,12 @@ public class LogoutController {
     }
 
     private String buildKeycloakLogoutUrl() {
-        String encodedRedirect = URLEncoder.encode(
-                postLogoutRedirectUri,
-                StandardCharsets.UTF_8
-        );
-
-        return keycloakBaseUrl
-                + "/realms/" + realm
-                + "/protocol/openid-connect/logout"
-                + "?post_logout_redirect_uri=" + encodedRedirect;
+        return UriComponentsBuilder
+                .fromUriString(keycloakBaseUrl)
+                .path("/realms/{realm}/protocol/openid-connect/logout")
+                .queryParam("post_logout_redirect_uri", postLogoutRedirectUri)
+                .queryParam("client_id", clientId)
+                .buildAndExpand(realm)
+                .toUriString();
     }
 }
