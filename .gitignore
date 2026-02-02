@@ -81,3 +81,7 @@ CLAUDE.md
 GEMINI.md
 .claude
 dummy-data.sql
+
+# application config
+src/main/resources/application*.yml
+src/test/resources/application*.yml

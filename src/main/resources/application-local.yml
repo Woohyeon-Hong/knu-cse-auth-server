@@ -66,6 +66,7 @@ app:
 keycloak:
   base-url: http://localhost:8080
   realm: cse-sso
+  post-logout-redirect-uri: http://localhost:8081
   admin:
     client-id: cse-sso-admin
     client-secret: QyVsqaoANoiiKoXuekmGIoNQwdMML6m4
