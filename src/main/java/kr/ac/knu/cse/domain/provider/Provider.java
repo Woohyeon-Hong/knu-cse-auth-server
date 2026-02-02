@@ -1,5 +1,7 @@
 package kr.ac.knu.cse.domain.provider;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -63,7 +65,7 @@ import lombok.NoArgsConstructor;
 public class Provider extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "provider_id")
     private Long id;
 

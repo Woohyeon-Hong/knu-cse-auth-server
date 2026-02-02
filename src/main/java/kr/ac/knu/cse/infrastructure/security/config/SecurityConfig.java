@@ -20,14 +20,21 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/error").permitAll()
+                        .requestMatchers(
+                                "/login",
+                                "/error",
+                                "/oauth2/**",
+                                "/login/oauth2/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth -> oauth
+
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
                         .successHandler(successHandler)
-                )
-                .oauth2Client(Customizer.withDefaults());
+                );
 
         return http.build();
     }

@@ -1,5 +1,6 @@
 package kr.ac.knu.cse.domain.student;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
 import static kr.ac.knu.cse.domain.role.RoleType.ROLE_USER;
 
 import jakarta.persistence.Column;
@@ -7,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import kr.ac.knu.cse.domain.role.RoleType;
@@ -58,7 +60,7 @@ import lombok.NoArgsConstructor;
 public class Student extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "student_id")
     private Long id;
 

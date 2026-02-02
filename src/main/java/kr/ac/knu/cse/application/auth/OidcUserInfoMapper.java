@@ -8,12 +8,13 @@ import org.springframework.stereotype.Component;
 public class OidcUserInfoMapper {
 
     private static final String REQUIRED_EMAIL_DOMAIN = "@knu.ac.kr";
+    private static final String PROVIDER_NAME = "KEYCLOAK";
 
 
     public OAuthUserInfo map(OidcUser oidcUser) {
         validateOidcUser(oidcUser);
 
-        String providerName = extractProviderName(oidcUser);
+        String providerName = PROVIDER_NAME;
         String providerKey = oidcUser.getSubject();
         String name = extractName(oidcUser);
 
@@ -34,17 +35,8 @@ public class OidcUserInfoMapper {
         }
     }
 
-    private String extractProviderName(OidcUser oidcUser) {
-        String providerName = oidcUser.getClaim("identity_provider");
-
-        if (providerName == null || providerName.isBlank()) {
-            throw new IllegalArgumentException("Missing identity_provider claim");
-        }
-        return providerName.toUpperCase(); // GOOGLE
-    }
-
     private String extractEmail(OidcUser oidcUser) {
-        String email = oidcUser.getClaim("email");
+        String email = oidcUser.getEmail();
 
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Missing email claim");
@@ -54,12 +46,13 @@ public class OidcUserInfoMapper {
     }
 
     private String extractName(OidcUser oidcUser) {
-        String name = oidcUser.getClaim("name");
+        String name = oidcUser.getFullName();
 
         if (name != null && !name.isBlank()) {
             return name;
         }
-        return oidcUser.getClaim("preferred_username");
+
+        return oidcUser.getPreferredUsername();
     }
 
     private void validateEmailDomain(String email) {

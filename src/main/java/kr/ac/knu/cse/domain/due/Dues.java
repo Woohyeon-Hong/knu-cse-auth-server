@@ -1,5 +1,7 @@
 package kr.ac.knu.cse.domain.due;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -43,7 +45,7 @@ public class Dues extends BaseTimeEntity {
     public static final int MIN_VALID_REMAINING_SEMESTERS = 1;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "dues_id")
     private Long id;
 

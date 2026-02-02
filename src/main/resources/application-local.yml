@@ -1,5 +1,5 @@
 server:
-  port: 40001
+  port: 8081
 
 spring:
   datasource:
@@ -30,6 +30,23 @@ spring:
           time_zone: Asia/Seoul
         default_batch_fetch_size: 20
 
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: cse-sso-server
+            client-secret: XTOfJmnaoOzilOgoVZXup5rlwKjF7fTd
+            scope:
+              - openid
+              - profile
+              - email
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/cse-sso
+
 logging:
   level:
     kr.ac.knu.cse: DEBUG
@@ -48,14 +65,14 @@ app:
 
 keycloak:
   base-url: http://localhost:8080
-  realm: your-realm
+  realm: cse-sso
   admin:
-    client-id: admin-cli-client
-    client-secret: admin-cli-secret
-
+    client-id: cse-sso-admin
+    client-secret: QyVsqaoANoiiKoXuekmGIoNQwdMML6m4
 sso:
   redirect-allowlist:
     - https://service-a.example.com/auth/callback
     - https://service-b.example.com/auth/callback
+    - http://example.com
 
 
