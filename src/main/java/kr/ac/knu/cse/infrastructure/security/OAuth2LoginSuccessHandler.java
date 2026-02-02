@@ -1,10 +1,12 @@
 package kr.ac.knu.cse.infrastructure.security;
 
-import jakarta.servlet.http.Cookie;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.net.URLEncoder;
 import kr.ac.knu.cse.application.auth.OAuthLoginService;
 import kr.ac.knu.cse.application.auth.OidcUserInfoMapper;
 import kr.ac.knu.cse.application.auth.dto.OAuthLoginResult;
@@ -12,6 +14,7 @@ import kr.ac.knu.cse.infrastructure.keycloak.KeycloakAdminClient;
 import kr.ac.knu.cse.presentation.auth.LoginController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -98,14 +101,15 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private void setAccessTokenCookie(
             HttpServletResponse response,
             String tokenValue) {
-        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, tokenValue);
+        ResponseCookie cookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, tokenValue)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(COOKIE_MAX_AGE)
+                .sameSite("LAX")
+                .build();
 
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(COOKIE_MAX_AGE);
-
-        response.addCookie(cookie);
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     private void doRedirect(
@@ -127,6 +131,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             return;
         }
 
-        response.sendRedirect(redirectUri + "?state=" + state);
+        response.sendRedirect(redirectUri + "?state=" + URLEncoder.encode(state, UTF_8));
     }
 }

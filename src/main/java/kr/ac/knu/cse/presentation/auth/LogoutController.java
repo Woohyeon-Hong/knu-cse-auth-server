@@ -1,13 +1,15 @@
 package kr.ac.knu.cse.presentation.auth;
 
+import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,13 +44,15 @@ public class LogoutController {
     }
 
     private void deleteAccessTokenCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, "");
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setMaxAge(0);
+        ResponseCookie cookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, "")
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .maxAge(0)
+                .build();
 
-        response.addCookie(cookie);
+        response.addHeader(SET_COOKIE, cookie.toString());
     }
 
     private String buildKeycloakLogoutUrl() {

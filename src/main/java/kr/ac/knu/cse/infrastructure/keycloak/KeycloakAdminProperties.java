@@ -1,12 +1,14 @@
 package kr.ac.knu.cse.infrastructure.keycloak;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "keycloak")
 public record KeycloakAdminProperties(
-        String baseUrl,
-        String realm,
-        Admin admin
+        @NotBlank String baseUrl,
+        @NotBlank String realm,
+        @NotNull Admin admin
 ) {
-    public record Admin(String clientId, String clientSecret) {}
+    public record Admin(@NotBlank String clientId, @NotBlank String clientSecret) {}
 }

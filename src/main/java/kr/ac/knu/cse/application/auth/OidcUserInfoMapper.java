@@ -52,7 +52,13 @@ public class OidcUserInfoMapper {
             return name;
         }
 
-        return oidcUser.getPreferredUsername();
+        String preferredUsername = oidcUser.getPreferredUsername();
+
+        if (preferredUsername == null || preferredUsername.isBlank()) {
+            throw new IllegalArgumentException("Missing name claim");
+        }
+
+        return preferredUsername;
     }
 
     private void validateEmailDomain(String email) {

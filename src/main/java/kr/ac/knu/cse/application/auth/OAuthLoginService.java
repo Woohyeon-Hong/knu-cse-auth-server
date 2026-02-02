@@ -1,5 +1,7 @@
 package kr.ac.knu.cse.application.auth;
 
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
+
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import kr.ac.knu.cse.application.auth.dto.OAuthLoginResult;
@@ -11,11 +13,11 @@ import kr.ac.knu.cse.domain.student.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class OAuthLoginService {
     private static final int MAX_RETRY = 3;
     private static final String TEMP_PREFIX = "TEMP";
@@ -24,6 +26,7 @@ public class OAuthLoginService {
     private final ProviderRepository providerRepository;
     private final StudentRepository studentRepository;
 
+    @Transactional(propagation = REQUIRES_NEW)
     public OAuthLoginResult login(OAuthUserInfo userInfo) {
         Provider provider = findProvider(userInfo)
                 .orElseGet(() -> createNewUser(userInfo));
@@ -61,7 +64,6 @@ public class OAuthLoginService {
             try {
                 Student student = Student.of(name, generateTempStudentNumber());
                 studentRepository.save(student);
-                System.out.println(student.getStudentNumber());
                 return student;
             } catch (DataIntegrityViolationException e) {
                 if (i == MAX_RETRY - 1) {
