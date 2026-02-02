@@ -5,14 +5,14 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.RestClient;
 
 @Component
 @RequiredArgsConstructor
 public class KeycloakAdminClient {
 
-    private final WebClient keycloakWebClient;
+    private final RestClient keycloakRestClient;
     private final KeycloakAdminProperties keycloakAdminProperties;
 
     public void upsertStudentIdAttribute(String keycloakUserId, Long studentId) {
@@ -28,15 +28,20 @@ public class KeycloakAdminClient {
     }
 
     private Map<String, Object> requestToken() {
-        return keycloakWebClient.post()
-                .uri(keycloakAdminProperties.baseUrl() + "/realms/" + keycloakAdminProperties.realm() + "/protocol/openid-connect/token")
+        return keycloakRestClient.post()
+                .uri(keycloakAdminProperties.baseUrl()
+                        + "/realms/" + keycloakAdminProperties.realm()
+                        + "/protocol/openid-connect/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters.fromFormData("grant_type", "client_credentials")
-                        .with("client_id", keycloakAdminProperties.admin().clientId())
-                        .with("client_secret", keycloakAdminProperties.admin().clientSecret()))
+                .body(
+                        new LinkedMultiValueMap<>() {{
+                            add("grant_type", "client_credentials");
+                            add("client_id", keycloakAdminProperties.admin().clientId());
+                            add("client_secret", keycloakAdminProperties.admin().clientSecret());
+                        }}
+                )
                 .retrieve()
-                .bodyToMono(Map.class)
-                .block();
+                .body(Map.class);
     }
 
     private void validateTokenResponse(Map<String, Object> tokenResponse) {
@@ -58,14 +63,15 @@ public class KeycloakAdminClient {
             String token,
             Map<String, Object> payload) {
 
-        keycloakWebClient.put()
-                .uri(keycloakAdminProperties.baseUrl() + "/admin/realms/" + keycloakAdminProperties.realm() + "/users/" + keycloakUserId)
+        keycloakRestClient.put()
+                .uri(keycloakAdminProperties.baseUrl()
+                        + "/admin/realms/" + keycloakAdminProperties.realm()
+                        + "/users/" + keycloakUserId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .headers(h -> h.setBearerAuth(token))
-                .bodyValue(payload)
+                .body(payload)
                 .retrieve()
-                .toBodilessEntity()
-                .block();
+                .toBodilessEntity();
     }
 
     public void ensureRealmRole(String keycloakUserId, String roleName) {
@@ -78,12 +84,13 @@ public class KeycloakAdminClient {
     }
 
     private Map<String, Object> requestOriginalRole(String roleName, String token) {
-        return keycloakWebClient.get()
-                .uri(keycloakAdminProperties.baseUrl() + "/admin/realms/" + keycloakAdminProperties.realm() + "/roles/" + roleName)
+        return keycloakRestClient.get()
+                .uri(keycloakAdminProperties.baseUrl()
+                        + "/admin/realms/" + keycloakAdminProperties.realm()
+                        + "/roles/" + roleName)
                 .headers(h -> h.setBearerAuth(token))
                 .retrieve()
-                .bodyToMono(Map.class)
-                .block();
+                .body(Map.class);
     }
 
     private void validateRole(String roleName, Map<String, Object> role) {
@@ -93,15 +100,15 @@ public class KeycloakAdminClient {
     }
 
     private void requestUpdateOfRole(String keycloakUserId, String token, Map<String, Object> role) {
-        keycloakWebClient.post()
-                .uri(keycloakAdminProperties.baseUrl() + "/admin/realms/" + keycloakAdminProperties.realm()
+        keycloakRestClient.post()
+                .uri(keycloakAdminProperties.baseUrl()
+                        + "/admin/realms/" + keycloakAdminProperties.realm()
                         + "/users/" + keycloakUserId + "/role-mappings/realm")
                 .contentType(MediaType.APPLICATION_JSON)
                 .headers(h -> h.setBearerAuth(token))
-                .bodyValue(List.of(role))
+                .body(List.of(role))
                 .retrieve()
-                .toBodilessEntity()
-                .block();
+                .toBodilessEntity();
     }
 }
 

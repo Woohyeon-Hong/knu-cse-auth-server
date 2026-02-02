@@ -51,8 +51,6 @@ public class OAuthLoginService {
                 student.getId()
         );
 
-        System.out.println(provider.getStudentId());
-
         providerRepository.save(provider);
 
         return provider;

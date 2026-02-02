@@ -2,14 +2,14 @@ package kr.ac.knu.cse.infrastructure.keycloak.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 //HTTP Client for keycloak REST Admin APIs
 @Configuration
-public class KeycloakWebClientConfig {
+public class KeycloakRestClientConfig {
 
     @Bean
-    public WebClient keycloakWebClient() {
-        return WebClient.builder().build();
+    public RestClient keycloakRestClient() {
+        return RestClient.builder().build();
     }
 }
