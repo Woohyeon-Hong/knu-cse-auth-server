@@ -1,19 +1,21 @@
-package kr.ac.knu.cse.application.auth;
+package kr.ac.knu.cse.application;
 
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import kr.ac.knu.cse.application.auth.dto.OAuthLoginResult;
-import kr.ac.knu.cse.application.auth.dto.OAuthUserInfo;
+import kr.ac.knu.cse.application.dto.OAuthLoginResult;
+import kr.ac.knu.cse.application.dto.OAuthUserInfo;
 import kr.ac.knu.cse.domain.provider.Provider;
 import kr.ac.knu.cse.domain.provider.ProviderRepository;
 import kr.ac.knu.cse.domain.student.Student;
 import kr.ac.knu.cse.domain.student.StudentRepository;
+import kr.ac.knu.cse.global.exception.provisioning.DuplicateStudentNumberException;
+import kr.ac.knu.cse.global.exception.provisioning.ProviderWithoutStudentException;
+import kr.ac.knu.cse.global.exception.provisioning.TempStudentCreationFailedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -67,17 +69,14 @@ public class OAuthLoginService {
                 return student;
             } catch (DataIntegrityViolationException e) {
                 if (i == MAX_RETRY - 1) {
-                    throw new IllegalStateException(
-                            "Failed to generate unique temporary student number", e
-                    );
+                    throw new DuplicateStudentNumberException();
                 }
             }
         }
-        throw new IllegalStateException("Unreachable");
+        throw new TempStudentCreationFailedException();
     }
 
     public String generateTempStudentNumber() {
-        // Picks a random value between 0 and 10^11.
         long randomNumber = ThreadLocalRandom.current().nextLong(
                 0,
                 (long) Math.pow(10, TEMP_NUMBER_LENGTH)
@@ -90,12 +89,10 @@ public class OAuthLoginService {
         Long studentId = provider.getStudentId();
 
         if (provider.getStudentId() == null) {
-            throw new IllegalStateException("provider doesn't have a student");
+            throw new ProviderWithoutStudentException();
         }
 
         return studentRepository.findById(studentId)
-                .orElseThrow(() -> new IllegalStateException(
-                        "Provider exists but Student not found. providerId=" + provider.getId()
-                ));
+                .orElseThrow(ProviderWithoutStudentException::new);
     }
 }

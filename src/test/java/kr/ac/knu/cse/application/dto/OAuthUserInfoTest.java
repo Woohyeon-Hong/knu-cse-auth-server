@@ -1,8 +1,7 @@
-package kr.ac.knu.cse.application.auth.dto;
+package kr.ac.knu.cse.application.dto;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import kr.ac.knu.cse.application.auth.dto.OAuthUserInfo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

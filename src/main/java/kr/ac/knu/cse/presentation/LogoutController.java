@@ -1,4 +1,4 @@
-package kr.ac.knu.cse.presentation.auth;
+package kr.ac.knu.cse.presentation;
 
 import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.HttpHeaders.LOCATION;

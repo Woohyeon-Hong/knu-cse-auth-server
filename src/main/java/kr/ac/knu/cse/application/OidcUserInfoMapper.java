@@ -1,6 +1,9 @@
-package kr.ac.knu.cse.application.auth;
+package kr.ac.knu.cse.application;
 
-import kr.ac.knu.cse.application.auth.dto.OAuthUserInfo;
+import kr.ac.knu.cse.application.dto.OAuthUserInfo;
+import kr.ac.knu.cse.global.exception.auth.InvalidEmailDomainException;
+import kr.ac.knu.cse.global.exception.auth.InvalidOidcUserException;
+import kr.ac.knu.cse.global.exception.auth.MissingEmailClaimException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +17,6 @@ public class OidcUserInfoMapper {
     public OAuthUserInfo map(OidcUser oidcUser) {
         validateOidcUser(oidcUser);
 
-        String providerName = PROVIDER_NAME;
         String providerKey = oidcUser.getSubject();
         String name = extractName(oidcUser);
 
@@ -22,7 +24,7 @@ public class OidcUserInfoMapper {
         validateEmailDomain(email);
 
         return OAuthUserInfo.of(
-                providerName,
+                PROVIDER_NAME,
                 providerKey,
                 email,
                 name
@@ -31,7 +33,7 @@ public class OidcUserInfoMapper {
 
     private void validateOidcUser(OidcUser oidcUser) {
         if (oidcUser == null) {
-            throw new IllegalArgumentException("OidcUser must not be null");
+            throw new InvalidOidcUserException();
         }
     }
 
@@ -39,7 +41,7 @@ public class OidcUserInfoMapper {
         String email = oidcUser.getEmail();
 
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Missing email claim");
+            throw new MissingEmailClaimException();
         }
 
         return email;
@@ -55,7 +57,7 @@ public class OidcUserInfoMapper {
         String preferredUsername = oidcUser.getPreferredUsername();
 
         if (preferredUsername == null || preferredUsername.isBlank()) {
-            throw new IllegalArgumentException("Missing name claim");
+            throw new InvalidOidcUserException();
         }
 
         return preferredUsername;
@@ -63,9 +65,7 @@ public class OidcUserInfoMapper {
 
     private void validateEmailDomain(String email) {
         if (!email.endsWith(REQUIRED_EMAIL_DOMAIN)) {
-            throw new IllegalArgumentException(
-                    "Invalid email domain: " + email
-            );
+            throw new InvalidEmailDomainException();
         }
     }
 }

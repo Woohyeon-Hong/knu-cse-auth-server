@@ -1,4 +1,4 @@
-package kr.ac.knu.cse.application.auth.dto;
+package kr.ac.knu.cse.application.dto;
 
 import lombok.AccessLevel;
 import lombok.Getter;

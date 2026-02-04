@@ -1,4 +1,4 @@
-package kr.ac.knu.cse.presentation.auth;
+package kr.ac.knu.cse.presentation;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.UUID;

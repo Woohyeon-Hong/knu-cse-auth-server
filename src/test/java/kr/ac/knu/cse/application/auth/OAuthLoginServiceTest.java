@@ -2,22 +2,9 @@ package kr.ac.knu.cse.application.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
 
-import java.util.Optional;
-import kr.ac.knu.cse.application.auth.dto.OAuthLoginResult;
-import kr.ac.knu.cse.application.auth.dto.OAuthUserInfo;
-import kr.ac.knu.cse.domain.provider.ProviderRepository;
-import kr.ac.knu.cse.domain.student.Student;
-import kr.ac.knu.cse.domain.student.StudentRepository;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
 class OAuthLoginServiceTest {
