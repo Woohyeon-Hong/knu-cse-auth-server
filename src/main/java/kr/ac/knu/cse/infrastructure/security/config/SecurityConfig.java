@@ -4,11 +4,11 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
 import kr.ac.knu.cse.infrastructure.security.OAuth2LoginSuccessHandler;
+import kr.ac.knu.cse.infrastructure.security.OAuth2LogoutSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,7 +20,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final OAuth2LoginSuccessHandler successHandler;
+    private final OAuth2LoginSuccessHandler loginSuccessHandler;
+    private final OAuth2LogoutSuccessHandler logoutSuccessHandler;
     private final OAuth2AuthorizationRequestResolver authorizationRequestResolver;
 
     @Bean
@@ -29,7 +30,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .logout(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessHandler(logoutSuccessHandler)
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                )
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(GET, "/login/**").permitAll()
@@ -41,7 +49,7 @@ public class SecurityConfig {
                         .authorizationEndpoint(endpoint -> endpoint
                                 .authorizationRequestResolver(authorizationRequestResolver)
                         )
-                        .successHandler(successHandler)
+                        .successHandler(loginSuccessHandler)
                 );
 
         return http.build();

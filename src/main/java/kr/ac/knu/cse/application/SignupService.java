@@ -7,7 +7,6 @@ import kr.ac.knu.cse.domain.provider.ProviderRepository;
 import kr.ac.knu.cse.domain.student.Student;
 import kr.ac.knu.cse.domain.student.StudentRepository;
 import kr.ac.knu.cse.global.exception.auth.AlreadySignedUpException;
-import kr.ac.knu.cse.global.exception.provisioning.InvalidStudentNumberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
