@@ -74,7 +74,7 @@ public class KeycloakAdminClient {
                 .toBodilessEntity();
     }
 
-    public void ensureRealmRole(String keycloakUserId, String roleName) {
+    public void updateRoleInKeycloak(String keycloakUserId, String roleName) {
         String token = getAdminAccessToken();
 
         Map<String, Object> role = requestOriginalRole(roleName, token);

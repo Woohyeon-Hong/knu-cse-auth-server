@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import kr.ac.knu.cse.support.JpaIntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +28,22 @@ class StudentRepositoryTest {
     void of() {
         //given
         String studentNumber = "2022111111";
-        Student student1 = Student.of("학생1",  studentNumber);
+        Student student1 = Student.of(
+                "컴퓨터학부",
+                "학생1",
+                studentNumber,
+                Grade.SECOND
+        );
 
        studentRepository.save(student1);
         flushAndClear();
 
-        Student student2 = Student.of("학생2", studentNumber);
+        Student student2 = Student.of(
+                "컴퓨터학부",
+                "학생2",
+                studentNumber,
+                Grade.THIRD
+        );
 
         //when && then
         assertThatThrownBy(() -> {
@@ -48,7 +57,12 @@ class StudentRepositoryTest {
     void findByStudentNumber() {
         //given
         String studentNumber = "2022111111";
-        Student student = Student.of("학생1",  studentNumber);
+        Student student = Student.of(
+                "컴퓨터학부",
+                "학생1",
+                studentNumber,
+                Grade.SECOND
+        );
 
         Student saved = studentRepository.save(student);
         flushAndClear();
@@ -66,7 +80,12 @@ class StudentRepositoryTest {
     void existsByStudentNumber() {
         //given
         String studentNumber = "2022111111";
-        Student student = Student.of("학생1",  studentNumber);
+        Student student = Student.of(
+                "컴퓨터학부",
+                "학생1",
+                studentNumber,
+                Grade.SECOND
+        );
 
         studentRepository.save(student);
         flushAndClear();

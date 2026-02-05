@@ -1,4 +1,4 @@
-package kr.ac.knu.cse.application;
+package kr.ac.knu.cse.infrastructure.security;
 
 import kr.ac.knu.cse.application.dto.OAuthUserInfo;
 import kr.ac.knu.cse.global.exception.auth.InvalidEmailDomainException;

@@ -1,7 +1,7 @@
 package kr.ac.knu.cse.domain.student;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
-import static kr.ac.knu.cse.domain.role.RoleType.ROLE_USER;
+import static kr.ac.knu.cse.domain.student.RoleType.ROLE_USER;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,8 +10,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import kr.ac.knu.cse.domain.role.RoleType;
 import kr.ac.knu.cse.global.base.BaseTimeEntity;
+import kr.ac.knu.cse.global.exception.provisioning.InvalidRoleException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -72,28 +72,41 @@ public class Student extends BaseTimeEntity {
     private String name;
     @Column(name = "student_number", nullable = false, length = 15, unique = true)
     private String studentNumber;
+    @Enumerated(EnumType.STRING)
     @Column(name = "grade", nullable = false, length = 15)
-    private String grade;
+    private Grade grade;
 
     public static Student of(
+            String major,
             String name,
-            String studentNumber
+            String studentNumber,
+            Grade grade
     ) {
+        validate(major, name, studentNumber, grade);
+
         return new Student(
                 null,
                 ROLE_USER,
-                "UNKNOWN",
+                major,
                 name,
                 studentNumber,
-                "UNKNOWN"
+                grade
         );
     }
 
-    public void assignTempIdForTest() {
-        this.id = 1L;
+    private static void validate(
+            String major,
+            String name,
+            String studentNumber,
+            Grade grade) {
+
     }
 
     public void grantRole(RoleType role) {
+        if (role == null) {
+            throw new InvalidRoleException();
+        }
+
         this.role = role;
     }
 
@@ -101,26 +114,7 @@ public class Student extends BaseTimeEntity {
         this.role = ROLE_USER;
     }
 
-    public void replaceMajor(String major) {
-        this.major = major;
-    }
-
-    public void replaceStudentNumber(String studentNumber) {
-        this.studentNumber = studentNumber;
-    }
-
-    public void replaceGrade(String grade) {
-        this.grade = grade;
-    }
-
-    public boolean hasConfirmedMajor() {
-        return !major.equals("UNKNOWN");
-    }
-
-    public boolean hasConfirmedStudentNumber() {
-        return !studentNumber.startsWith("TEMP");
-    }
-    public boolean hasConfirmedGrade() {
-        return !studentNumber.equals("UNKNWON");
+    public void promoteGrade() {
+        this.grade = grade.promote();
     }
 }

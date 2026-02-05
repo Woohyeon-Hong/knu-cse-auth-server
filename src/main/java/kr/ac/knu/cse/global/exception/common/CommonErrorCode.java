@@ -4,7 +4,6 @@ import kr.ac.knu.cse.global.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
 public enum CommonErrorCode implements ErrorCode {
 

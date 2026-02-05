@@ -2,6 +2,7 @@ package kr.ac.knu.cse.domain.redirect;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import kr.ac.knu.cse.global.exception.auth.InvalidRedirectUriException;
 import kr.ac.knu.cse.support.SpringBootTestWithoutSecurity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ class RedirectUriPolicyTest {
     @Test
     void validate_have_not_assigned() {
         assertThatThrownBy(() -> redirectUriPolicy.validate(""))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(InvalidRedirectUriException.class);
 
     }
 }

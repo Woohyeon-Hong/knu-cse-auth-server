@@ -8,9 +8,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLEncoder;
 import kr.ac.knu.cse.application.OAuthLoginService;
-import kr.ac.knu.cse.application.OidcUserInfoMapper;
 import kr.ac.knu.cse.application.dto.OAuthLoginResult;
-import kr.ac.knu.cse.infrastructure.keycloak.KeycloakAdminClient;
+import kr.ac.knu.cse.global.exception.auth.InvalidOidcUserException;
 import kr.ac.knu.cse.presentation.LoginController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
@@ -29,13 +28,20 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final String ACCESS_TOKEN_COOKIE_NAME = "ACCESS_TOKEN";
+    private static final String SIGNUP_CALLBACK_URL = "/signup";
+
+    private static final String COOKIE_ACCESS_TOKEN_NAME = "ACCESS_TOKEN";
+    private static final String COOKIE_PATH_VALUE = "/";
     private static final int COOKIE_MAX_AGE = 60 * 60;
+    private static final String COOKIE_SAME_SITE_VALUE = "LAX";
+    private static final String HEADER_COOKIE_NAME = "Set-Cookie";
+
+    private static final int INVALID_SESSION_STATUS_CODE = 400;
+    private static final String INVALID_SESSION_MESSAGE = "Invalid session";
 
     private final OidcUserInfoMapper oidcUserInfoMapper;
     private final OAuthLoginService oAuthLoginService;
     private final OAuth2AuthorizedClientService authorizedClientService;
-    private final KeycloakAdminClient keycloakAdminClient;
 
     @Override
     public void onAuthenticationSuccess(
@@ -43,94 +49,109 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException {
+        OAuthLoginResult result = loginWith(authentication);
 
-        validate(authentication);
+        if (result.isNewUser()) {
+            redirectToSignup(response);
+            return;
+        }
 
-        OAuth2AuthenticationToken oauthToken =
-                (OAuth2AuthenticationToken) authentication;
+        OAuth2AccessToken accessToken = extractAccessToken(
+                (OAuth2AuthenticationToken) authentication
+        );
+
+        setAccessTokenCookie(
+                response,
+                accessToken.getTokenValue()
+        );
+        redirectToClient(request, response);
+    }
+
+    private OAuthLoginResult loginWith(Authentication authentication) {
+        validateAuthentication(authentication);
+
         OidcUser oidcUser =
                 (OidcUser) authentication.getPrincipal();
 
-        OAuthLoginResult result = oAuthLoginService.login(
+        return oAuthLoginService.login(
                 oidcUserInfoMapper.map(oidcUser)
         );
-
-        keycloakAdminClient.upsertStudentIdAttribute(oidcUser.getSubject(), result.studentId());    // save studentId in Keycloak user attribute
-        keycloakAdminClient.ensureRealmRole(oidcUser.getSubject(), "ROLE_USER");    // assign ROLE_USER to role in keycloak
-
-        OAuth2AccessToken accessToken = extractAccessToken(oauthToken);
-        validateAccessToken(accessToken);
-
-        setAccessTokenCookie(response, accessToken.getTokenValue());
-
-        doRedirect(request, response);
     }
 
-    public void validate( Authentication authentication) {
-        if (!(authentication instanceof OAuth2AuthenticationToken)) {
-            throw new IllegalStateException("Unexpected authentication type: " + authentication);
-        }
-
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof OidcUser)) {
-            throw new IllegalStateException("Principal is not OidcUser");
+    public void validateAuthentication(Authentication authentication) {
+        if (!(authentication instanceof OAuth2AuthenticationToken)
+                || !(authentication.getPrincipal() instanceof OidcUser)
+        ) {
+            throw new InvalidOidcUserException();
         }
     }
 
-    private OAuth2AccessToken extractAccessToken(OAuth2AuthenticationToken oauthToken) {
+    private void redirectToSignup(
+            HttpServletResponse response
+    ) throws IOException {
+        response.sendRedirect(SIGNUP_CALLBACK_URL);
+    }
+
+    private OAuth2AccessToken extractAccessToken(
+            OAuth2AuthenticationToken token
+    ) {
         OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
-                oauthToken.getAuthorizedClientRegistrationId(),
-                oauthToken.getName()
+                token.getAuthorizedClientRegistrationId(),
+                token.getName()
         );
         validateClient(client);
+
         return client.getAccessToken();
     }
 
     private void validateClient(OAuth2AuthorizedClient client) {
-        if (client == null) {
-            throw new IllegalStateException("OAuth2AuthorizedClient not found");
-        }
-    }
-
-    private void validateAccessToken(OAuth2AccessToken accessToken) {
-        if (accessToken == null) {
-            throw new IllegalStateException("Access token is null");
+        if (client == null || client.getAccessToken() == null) {
+            throw new InvalidOidcUserException();
         }
     }
 
     private void setAccessTokenCookie(
             HttpServletResponse response,
             String tokenValue) {
-        ResponseCookie cookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, tokenValue)
+        ResponseCookie cookie = ResponseCookie.from(COOKIE_ACCESS_TOKEN_NAME, tokenValue)
                 .httpOnly(true)
                 .secure(true)
-                .path("/")
+                .path(COOKIE_PATH_VALUE)
                 .maxAge(COOKIE_MAX_AGE)
-                .sameSite("LAX")
+                .sameSite(COOKIE_SAME_SITE_VALUE)
                 .build();
 
-        response.addHeader("Set-Cookie", cookie.toString());
+        response.addHeader(HEADER_COOKIE_NAME, cookie.toString());
     }
 
-    private void doRedirect(
+    private void redirectToClient(
             HttpServletRequest request,
             HttpServletResponse response) throws IOException {
 
         HttpSession session = request.getSession(false);
 
         if (session == null) {
-            response.sendError(400, "Missing session");
+            response.sendError(
+                    INVALID_SESSION_STATUS_CODE,
+                    INVALID_SESSION_MESSAGE
+            );
             return;
         }
 
-        String redirectUri = (String) session.getAttribute(LoginController.SESSION_REDIRECT_URI);
-        String state = (String) session.getAttribute(LoginController.SESSION_STATE);
+        String redirectUri =
+                (String) session.getAttribute(LoginController.SESSION_REDIRECT_URI);
+        String state =
+                (String) session.getAttribute(LoginController.SESSION_STATE);
 
         if (redirectUri == null || state == null) {
-            response.sendError(400, "Missing redirect_uri/state in session");
+            response.sendError(
+                    INVALID_SESSION_STATUS_CODE,
+                    INVALID_SESSION_MESSAGE
+            );
             return;
         }
 
-        response.sendRedirect(redirectUri + "?state=" + URLEncoder.encode(state, UTF_8));
+        response.sendRedirect(redirectUri + "?state="
+                + URLEncoder.encode(state, UTF_8));
     }
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
+import kr.ac.knu.cse.domain.student.Grade;
 import kr.ac.knu.cse.domain.student.Student;
 import kr.ac.knu.cse.domain.student.StudentRepository;
 import kr.ac.knu.cse.support.JpaIntegrationTest;
@@ -30,7 +31,12 @@ class ProviderRepositoryTest {
 
     @BeforeEach
     void beforeEach() {
-        Student student = Student.of("학생1", "2022111111");
+        Student student = Student.of(
+                "컴퓨터학부",
+                "학생1",
+                "2022111111",
+                Grade.SECOND
+        );
         studentRepository.save(student);
         flushAndClear();
     }
