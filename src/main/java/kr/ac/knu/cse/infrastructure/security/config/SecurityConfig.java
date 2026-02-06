@@ -3,9 +3,10 @@ package kr.ac.knu.cse.infrastructure.security.config;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
-import kr.ac.knu.cse.infrastructure.security.OAuth2LoginFailureHandler;
-import kr.ac.knu.cse.infrastructure.security.OAuth2LoginSuccessHandler;
-import kr.ac.knu.cse.infrastructure.security.OAuth2LogoutSuccessHandler;
+import kr.ac.knu.cse.infrastructure.security.filter.InternalApiKeyFilter;
+import kr.ac.knu.cse.infrastructure.security.filter.OAuth2LoginFailureHandler;
+import kr.ac.knu.cse.infrastructure.security.filter.OAuth2LoginSuccessHandler;
+import kr.ac.knu.cse.infrastructure.security.filter.OAuth2LogoutSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Profile("!test")
 @Configuration
@@ -25,6 +27,7 @@ public class SecurityConfig {
     private final OAuth2LoginFailureHandler loginFailureHandler;
     private final OAuth2LogoutSuccessHandler logoutSuccessHandler;
     private final OAuth2AuthorizationRequestResolver authorizationRequestResolver;
+    private final InternalApiKeyFilter internalApiKeyFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -50,9 +53,15 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/internal/**").permitAll()
                         .requestMatchers(GET, "/login/**").permitAll()
                         .requestMatchers(POST, "/logout/**").authenticated()
                         .anyRequest().authenticated()
+                )
+
+                .addFilterBefore(
+                        internalApiKeyFilter,
+                        UsernamePasswordAuthenticationFilter.class
                 );
 
         return http.build();

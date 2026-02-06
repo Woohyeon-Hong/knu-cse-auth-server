@@ -1,4 +1,4 @@
-package kr.ac.knu.cse.infrastructure.security;
+package kr.ac.knu.cse.infrastructure.security.filter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

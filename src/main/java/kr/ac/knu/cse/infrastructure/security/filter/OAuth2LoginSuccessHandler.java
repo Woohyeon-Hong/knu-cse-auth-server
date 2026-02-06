@@ -1,4 +1,4 @@
-package kr.ac.knu.cse.infrastructure.security;
+package kr.ac.knu.cse.infrastructure.security.filter;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -9,7 +9,11 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import kr.ac.knu.cse.application.OAuthLoginService;
 import kr.ac.knu.cse.application.dto.OAuthLoginResult;
+import kr.ac.knu.cse.global.exception.BusinessException;
 import kr.ac.knu.cse.global.exception.auth.InvalidOidcUserException;
+import kr.ac.knu.cse.global.exception.auth.InvalidSessionException;
+import kr.ac.knu.cse.infrastructure.security.support.FilterBusinessExceptionWriter;
+import kr.ac.knu.cse.infrastructure.security.support.OidcUserInfoMapper;
 import kr.ac.knu.cse.presentation.LoginController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
@@ -36,12 +40,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private static final String COOKIE_SAME_SITE_VALUE = "LAX";
     private static final String HEADER_COOKIE_NAME = "Set-Cookie";
 
-    private static final int INVALID_SESSION_STATUS_CODE = 400;
-    private static final String INVALID_SESSION_MESSAGE = "Invalid session";
-
     private final OidcUserInfoMapper oidcUserInfoMapper;
     private final OAuthLoginService oAuthLoginService;
     private final OAuth2AuthorizedClientService authorizedClientService;
+    private final FilterBusinessExceptionWriter filterBusinessExceptionWriter;
 
     @Override
     public void onAuthenticationSuccess(
@@ -49,22 +51,27 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException {
-        OAuthLoginResult result = loginWith(authentication);
 
-        if (result.isNewUser()) {
-            redirectToSignup(response);
-            return;
+        try {
+            OAuthLoginResult result = loginWith(authentication);
+
+            if (result.isNewUser()) {
+                redirectToSignup(response);
+                return;
+            }
+
+            OAuth2AccessToken accessToken = extractAccessToken(
+                    (OAuth2AuthenticationToken) authentication
+            );
+
+            setAccessTokenCookie(
+                    response,
+                    accessToken.getTokenValue()
+            );
+            redirectToClient(request, response);
+        } catch (BusinessException e) {
+            filterBusinessExceptionWriter.write(response, e);
         }
-
-        OAuth2AccessToken accessToken = extractAccessToken(
-                (OAuth2AuthenticationToken) authentication
-        );
-
-        setAccessTokenCookie(
-                response,
-                accessToken.getTokenValue()
-        );
-        redirectToClient(request, response);
     }
 
     private OAuthLoginResult loginWith(Authentication authentication) {
@@ -131,11 +138,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         HttpSession session = request.getSession(false);
 
         if (session == null) {
-            response.sendError(
-                    INVALID_SESSION_STATUS_CODE,
-                    INVALID_SESSION_MESSAGE
-            );
-            return;
+            throw new InvalidSessionException();
         }
 
         String redirectUri =
@@ -144,11 +147,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 (String) session.getAttribute(LoginController.SESSION_STATE);
 
         if (redirectUri == null || state == null) {
-            response.sendError(
-                    INVALID_SESSION_STATUS_CODE,
-                    INVALID_SESSION_MESSAGE
-            );
-            return;
+            throw new InvalidSessionException();
         }
 
         response.sendRedirect(redirectUri + "?state="
