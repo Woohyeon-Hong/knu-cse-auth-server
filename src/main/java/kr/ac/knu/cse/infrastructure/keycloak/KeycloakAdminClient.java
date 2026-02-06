@@ -3,9 +3,9 @@ package kr.ac.knu.cse.infrastructure.keycloak;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestClient;
 
 @Component
@@ -14,39 +14,17 @@ public class KeycloakAdminClient {
 
     private final RestClient keycloakRestClient;
     private final KeycloakAdminProperties keycloakAdminProperties;
+    private final KeycloakAdminTokenClient tokenClient;
+    private final KeycloakExceptionTranslator exceptionTranslator;
 
     public void upsertStudentIdAttribute(String keycloakUserId, Long studentId) {
-        String token = getAdminAccessToken();
-        Map<String, Object> payload = createAttributes(studentId);
-        requestUpdateOfToken(keycloakUserId, token, payload);
-    }
+        String token = tokenClient.getAdminAccessToken();
 
-    private String getAdminAccessToken() {
-        Map<String, Object> response = requestToken();
-        validateTokenResponse(response);
-        return String.valueOf(response.get("access_token"));
-    }
-
-    private Map<String, Object> requestToken() {
-        return keycloakRestClient.post()
-                .uri(keycloakAdminProperties.baseUrl()
-                        + "/realms/" + keycloakAdminProperties.realm()
-                        + "/protocol/openid-connect/token")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(
-                        new LinkedMultiValueMap<>() {{
-                            add("grant_type", "client_credentials");
-                            add("client_id", keycloakAdminProperties.admin().clientId());
-                            add("client_secret", keycloakAdminProperties.admin().clientSecret());
-                        }}
-                )
-                .retrieve()
-                .body(Map.class);
-    }
-
-    private void validateTokenResponse(Map<String, Object> tokenResponse) {
-        if (tokenResponse == null || tokenResponse.get("access_token") == null) {
-            throw new IllegalStateException("Failed to get Keycloak admin access token");
+        try {
+            Map<String, Object> payload = createAttributes(studentId);
+            requestUpdateOfToken(keycloakUserId, token, payload);
+        } catch (Exception e) {
+            throw exceptionTranslator.translate(e);
         }
     }
 
@@ -75,12 +53,17 @@ public class KeycloakAdminClient {
     }
 
     public void updateRoleInKeycloak(String keycloakUserId, String roleName) {
-        String token = getAdminAccessToken();
+        String token = tokenClient.getAdminAccessToken();
 
-        Map<String, Object> role = requestOriginalRole(roleName, token);
-        validateRole(roleName, role);
+        try {
+            Map<String, Object> role = requestOriginalRole(roleName, token);
+            validateRole(roleName, role);
 
-        requestUpdateOfRole(keycloakUserId, token, role);
+            requestUpdateOfRole(keycloakUserId, token, role);
+        } catch (Exception e) {
+            throw exceptionTranslator.translate(e);
+        }
+
     }
 
     private Map<String, Object> requestOriginalRole(String roleName, String token) {
@@ -109,6 +92,24 @@ public class KeycloakAdminClient {
                 .body(List.of(role))
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    public void disableUser(String subject) {
+        String adminAccessToken = tokenClient.getAdminAccessToken();
+
+        try {
+            keycloakRestClient.put()
+                    .uri(keycloakAdminProperties.baseUrl()
+                                    + "/admin/realms/{realm}/users/{id}",
+                            keycloakAdminProperties.realm(), subject)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminAccessToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of("enabled", false))
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            throw exceptionTranslator.translate(e);
+        }
     }
 }
 

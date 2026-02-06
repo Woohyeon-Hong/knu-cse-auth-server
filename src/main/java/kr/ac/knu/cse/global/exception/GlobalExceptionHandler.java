@@ -32,13 +32,11 @@ public class GlobalExceptionHandler {
         if (code.startsWith("AUTH_")) {
             return HttpStatus.UNAUTHORIZED;
         }
-
-        if (code.startsWith("PROVISION_")) {
-            return HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-
         if (code.startsWith("COMMON_")) {
             return HttpStatus.BAD_REQUEST;
+        }
+        if (code.startsWith("PROVISION_") || code.startsWith("KC_")) {
+            return HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
         return HttpStatus.INTERNAL_SERVER_ERROR;

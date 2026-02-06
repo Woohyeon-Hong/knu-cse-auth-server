@@ -3,6 +3,7 @@ package kr.ac.knu.cse.infrastructure.security.config;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
+import kr.ac.knu.cse.infrastructure.security.OAuth2LoginFailureHandler;
 import kr.ac.knu.cse.infrastructure.security.OAuth2LoginSuccessHandler;
 import kr.ac.knu.cse.infrastructure.security.OAuth2LogoutSuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final OAuth2LoginSuccessHandler loginSuccessHandler;
+    private final OAuth2LoginFailureHandler loginFailureHandler;
     private final OAuth2LogoutSuccessHandler logoutSuccessHandler;
     private final OAuth2AuthorizationRequestResolver authorizationRequestResolver;
 
@@ -31,6 +33,14 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
+
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestResolver(authorizationRequestResolver)
+                        )
+                        .successHandler(loginSuccessHandler)
+                        .failureHandler(loginFailureHandler)
+                )
 
                 .logout(logout -> logout
                         .logoutUrl("/logout")
@@ -43,13 +53,6 @@ public class SecurityConfig {
                         .requestMatchers(GET, "/login/**").permitAll()
                         .requestMatchers(POST, "/logout/**").authenticated()
                         .anyRequest().authenticated()
-                )
-
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(endpoint -> endpoint
-                                .authorizationRequestResolver(authorizationRequestResolver)
-                        )
-                        .successHandler(loginSuccessHandler)
                 );
 
         return http.build();

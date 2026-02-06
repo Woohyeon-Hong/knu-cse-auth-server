@@ -10,7 +10,10 @@ public enum AuthErrorCode implements ErrorCode {
     INVALID_OIDC_USER("AUTH_002", "인증 사용자 정보가 올바르지 않습니다."),
     MISSING_EMAIL("AUTH_003", "이메일 정보가 누락되었습니다."),
     INVALID_EMAIL_DOMAIN("AUTH_004", "허용되지 않은 이메일 도메인입니다."),
-    ALREADY_SIGNED_UP("AUTH_005", "이미 회원가입 된 학생입니다.");
+    ALREADY_SIGNED_UP("AUTH_005", "이미 회원가입 된 학생입니다."),
+    ACCOUNT_DISABLED("AUTH_006", "비활성화된 계정입니다."),
+    INVALID_OAUTH_CLIENT("AUTH_007", "인증 서버 설정 오류입니다."),
+    UNAUTHORIZED_OAUTH_CLIENT("AUTH_008", "허용되지 않은 인증 클라이언트입니다.");
 
     private final String code;
     private final String message;
