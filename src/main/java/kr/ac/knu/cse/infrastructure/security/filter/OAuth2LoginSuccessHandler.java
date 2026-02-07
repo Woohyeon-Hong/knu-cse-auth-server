@@ -12,11 +12,14 @@ import kr.ac.knu.cse.application.dto.OAuthLoginResult;
 import kr.ac.knu.cse.global.exception.BusinessException;
 import kr.ac.knu.cse.global.exception.auth.InvalidOidcUserException;
 import kr.ac.knu.cse.global.exception.auth.InvalidSessionException;
+import kr.ac.knu.cse.infrastructure.security.support.CookieCreator;
 import kr.ac.knu.cse.infrastructure.security.support.FilterBusinessExceptionWriter;
 import kr.ac.knu.cse.infrastructure.security.support.OidcUserInfoMapper;
 import kr.ac.knu.cse.presentation.LoginController;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -32,18 +35,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final String SIGNUP_CALLBACK_URL = "/signup";
-
-    private static final String COOKIE_ACCESS_TOKEN_NAME = "ACCESS_TOKEN";
-    private static final String COOKIE_PATH_VALUE = "/";
-    private static final int COOKIE_MAX_AGE = 60 * 60;
-    private static final String COOKIE_SAME_SITE_VALUE = "LAX";
-    private static final String HEADER_COOKIE_NAME = "Set-Cookie";
+    @Value("${app.frontend.callback-url}")
+    private String callbackUrl;
 
     private final OidcUserInfoMapper oidcUserInfoMapper;
     private final OAuthLoginService oAuthLoginService;
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final FilterBusinessExceptionWriter filterBusinessExceptionWriter;
+    private final CookieCreator cookieCreator;
 
     @Override
     public void onAuthenticationSuccess(
@@ -96,7 +95,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private void redirectToSignup(
             HttpServletResponse response
     ) throws IOException {
-        response.sendRedirect(SIGNUP_CALLBACK_URL);
+        response.sendRedirect(callbackUrl);
     }
 
     private OAuth2AccessToken extractAccessToken(
@@ -120,15 +119,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private void setAccessTokenCookie(
             HttpServletResponse response,
             String tokenValue) {
-        ResponseCookie cookie = ResponseCookie.from(COOKIE_ACCESS_TOKEN_NAME, tokenValue)
-                .httpOnly(true)
-                .secure(true)
-                .path(COOKIE_PATH_VALUE)
-                .maxAge(COOKIE_MAX_AGE)
-                .sameSite(COOKIE_SAME_SITE_VALUE)
-                .build();
-
-        response.addHeader(HEADER_COOKIE_NAME, cookie.toString());
+        ResponseCookie cookie = cookieCreator.createWithValue(tokenValue);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     private void redirectToClient(

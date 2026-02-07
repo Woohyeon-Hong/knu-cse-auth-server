@@ -11,5 +11,5 @@ public interface ProviderRepository extends JpaRepository<Provider, Long> {
             String providerKey
     );
 
-    List<Provider> findAllByStudentId(Long studentId);
+    Optional<Provider> findByStudentId(Long studentId);
 }

@@ -1,7 +1,7 @@
 package kr.ac.knu.cse.domain.student;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
-import static kr.ac.knu.cse.domain.student.RoleType.ROLE_USER;
+import static kr.ac.knu.cse.domain.role.RoleType.ROLE_USER;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import kr.ac.knu.cse.domain.role.RoleType;
 import kr.ac.knu.cse.global.base.BaseTimeEntity;
 import kr.ac.knu.cse.global.exception.provisioning.InvalidRoleException;
 import lombok.AccessLevel;

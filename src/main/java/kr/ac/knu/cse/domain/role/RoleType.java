@@ -1,4 +1,4 @@
-package kr.ac.knu.cse.domain.student;
+package kr.ac.knu.cse.domain.role;
 
 /*
 ### RoleType

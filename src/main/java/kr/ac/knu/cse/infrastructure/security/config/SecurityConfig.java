@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -35,7 +36,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
+                .cors(Customizer.withDefaults())    //local
 
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(endpoint -> endpoint
@@ -52,9 +53,15 @@ public class SecurityConfig {
                         .clearAuthentication(true)
                 )
 
+                //local
+                .headers(headers -> headers
+                        .frameOptions(FrameOptionsConfig::disable)
+                )
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/internal/**").permitAll()
                         .requestMatchers(GET, "/login/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()  //local
                         .requestMatchers(POST, "/logout/**").authenticated()
                         .anyRequest().authenticated()
                 )

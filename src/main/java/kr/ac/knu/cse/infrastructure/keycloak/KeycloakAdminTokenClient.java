@@ -1,6 +1,7 @@
 package kr.ac.knu.cse.infrastructure.keycloak;
 
 import java.util.Map;
+import kr.ac.knu.cse.infrastructure.keycloak.config.KeycloakAdminProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;

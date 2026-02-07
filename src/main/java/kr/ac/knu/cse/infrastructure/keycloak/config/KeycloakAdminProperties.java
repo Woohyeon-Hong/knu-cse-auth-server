@@ -1,4 +1,4 @@
-package kr.ac.knu.cse.infrastructure.keycloak;
+package kr.ac.knu.cse.infrastructure.keycloak.config;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

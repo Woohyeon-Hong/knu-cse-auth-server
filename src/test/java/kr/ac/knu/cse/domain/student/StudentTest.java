@@ -1,6 +1,6 @@
 package kr.ac.knu.cse.domain.student;
 
-import static kr.ac.knu.cse.domain.student.RoleType.ROLE_USER;
+import static kr.ac.knu.cse.domain.role.RoleType.ROLE_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

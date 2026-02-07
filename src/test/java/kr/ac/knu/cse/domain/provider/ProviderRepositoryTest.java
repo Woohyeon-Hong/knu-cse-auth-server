@@ -8,6 +8,7 @@ import java.util.Optional;
 import kr.ac.knu.cse.domain.student.Grade;
 import kr.ac.knu.cse.domain.student.Student;
 import kr.ac.knu.cse.domain.student.StudentRepository;
+import kr.ac.knu.cse.global.exception.provisioning.ProviderWithoutStudentException;
 import kr.ac.knu.cse.support.JpaIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -100,7 +101,7 @@ class ProviderRepositoryTest {
 
     @DisplayName("Finds a student account by student number.")
     @Test
-    void findAllByStudentId() {
+    void findByStudentId() {
         //given
         Long studentId = studentRepository.findByStudentNumber("2022111111").get().getId();
         Provider provider = Provider.of(
@@ -113,7 +114,8 @@ class ProviderRepositoryTest {
         flushAndClear();
 
         //when
-        Provider found = providerRepository.findAllByStudentId(studentId).get(0);
+        Provider found = providerRepository.findByStudentId(studentId)
+                .orElseThrow(ProviderWithoutStudentException::new);
 
         //then
         assertThat(found).isEqualTo(saved);
