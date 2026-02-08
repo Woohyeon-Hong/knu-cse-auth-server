@@ -50,7 +50,7 @@ public class RoleChangeLog{
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    @Column(name = " role_change_log_id")
+    @Column(name = "role_change_log_id")
     private Long id;
 
     @Column(name = "student_id", nullable = false)

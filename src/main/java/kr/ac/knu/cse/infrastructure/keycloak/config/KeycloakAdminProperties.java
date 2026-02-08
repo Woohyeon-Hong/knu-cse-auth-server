@@ -1,5 +1,6 @@
 package kr.ac.knu.cse.infrastructure.keycloak.config;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -8,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record KeycloakAdminProperties(
         @NotBlank String baseUrl,
         @NotBlank String realm,
-        @NotNull Admin admin
+        @NotNull @Valid Admin admin
 ) {
     public record Admin(@NotBlank String clientId, @NotBlank String clientSecret) {}
 }

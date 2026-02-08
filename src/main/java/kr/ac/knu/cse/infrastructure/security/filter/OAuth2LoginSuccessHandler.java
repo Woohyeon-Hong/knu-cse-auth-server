@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Profile("!test")
 @Component
@@ -142,7 +143,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             throw new InvalidSessionException();
         }
 
-        response.sendRedirect(redirectUri + "?state="
-                + URLEncoder.encode(state, UTF_8));
+        session.removeAttribute(LoginController.SESSION_REDIRECT_URI);
+        session.removeAttribute(LoginController.SESSION_STATE);
+
+        String target = UriComponentsBuilder.fromUriString(redirectUri)
+                .queryParam("state", state)
+                .build(true)
+                .toUriString();
+
+        response.sendRedirect(target);
     }
 }

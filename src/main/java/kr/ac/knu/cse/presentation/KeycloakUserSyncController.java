@@ -1,5 +1,6 @@
 package kr.ac.knu.cse.presentation;
 
+import jakarta.validation.Valid;
 import kr.ac.knu.cse.infrastructure.keycloak.KeycloakAdminClient;
 import kr.ac.knu.cse.presentation.dto.DeactivateUserRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class KeycloakUserSyncController {
 
     @PostMapping("/deactivate")
     public ResponseEntity<Void> deactivate(
-            @RequestBody DeactivateUserRequest request
+            @Valid @RequestBody DeactivateUserRequest request
     ) {
         keycloakAdminClient.disableUser(request.subject());
         return ResponseEntity.noContent().build();

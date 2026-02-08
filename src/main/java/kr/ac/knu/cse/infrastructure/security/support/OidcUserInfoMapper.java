@@ -17,7 +17,7 @@ public class OidcUserInfoMapper {
     public OAuthUserInfo map(OidcUser oidcUser) {
         validateOidcUser(oidcUser);
 
-        String providerKey = oidcUser.getSubject();
+        String providerKey = extractProviderKey(oidcUser);
         String name = extractName(oidcUser);
 
         String email = extractEmail(oidcUser);
@@ -35,6 +35,16 @@ public class OidcUserInfoMapper {
         if (oidcUser == null) {
             throw new InvalidOidcUserException();
         }
+    }
+
+    private String extractProviderKey(OidcUser oidcUser) {
+        String providerKey = oidcUser.getSubject();
+
+        if (providerKey == null || providerKey.isBlank()) {
+            throw new InvalidOidcUserException();
+        }
+
+        return providerKey;
     }
 
     private String extractEmail(OidcUser oidcUser) {
@@ -64,7 +74,7 @@ public class OidcUserInfoMapper {
     }
 
     private void validateEmailDomain(String email) {
-        if (!email.endsWith(REQUIRED_EMAIL_DOMAIN)) {
+        if (!email.toLowerCase().endsWith(REQUIRED_EMAIL_DOMAIN)) {
             throw new InvalidEmailDomainException();
         }
     }

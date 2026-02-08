@@ -1,9 +1,11 @@
 package kr.ac.knu.cse.presentation;
 
+import jakarta.validation.Valid;
 import kr.ac.knu.cse.application.SignupService;
 import kr.ac.knu.cse.application.dto.SignupCommand;
 import kr.ac.knu.cse.application.dto.SignupResponse;
 import kr.ac.knu.cse.global.exception.auth.InvalidOidcUserException;
+import kr.ac.knu.cse.global.exception.auth.MissingEmailClaimException;
 import kr.ac.knu.cse.presentation.dto.SignupRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,18 +29,22 @@ public class SignupController {
     @PostMapping
     public ResponseEntity<SignupResponse> signup(
             @AuthenticationPrincipal OidcUser oidcUser,
-            @RequestBody SignupRequest request
+            @Valid @RequestBody SignupRequest request
     ) {
         if (oidcUser == null) {
             throw new InvalidOidcUserException();
         }
 
+        String email = extractEmail(oidcUser);
+        String subject = extractSubject(oidcUser);
+        String fullName = extractFullName(oidcUser);
+
         SignupCommand command = new SignupCommand(
                 PROVIDER_NAME,
-                oidcUser.getSubject(),
-                oidcUser.getEmail(),
+                subject,
+                email,
                 request.studentNumber(),
-                oidcUser.getFullName(),
+                fullName,
                 request.major(),
                 request.grade()
         );
@@ -46,5 +52,34 @@ public class SignupController {
         SignupResponse response = signupService.signup(command);
 
         return ResponseEntity.ok(response);
+    }
+
+    private String extractEmail(OidcUser oidcUser) {
+        String email = oidcUser.getEmail();
+
+        if (email == null || email.isBlank()) {
+            throw new MissingEmailClaimException();
+        }
+        return email;
+    }
+
+    private String extractSubject(OidcUser oidcUser) {
+        String subject = oidcUser.getSubject();
+
+        if (subject == null || subject.isBlank()) {
+            throw new InvalidOidcUserException();
+        }
+
+        return subject;
+    }
+
+    private String extractFullName(OidcUser oidcUser) {
+        String fullName = oidcUser.getFullName();
+
+        if (fullName == null || fullName.isBlank()) {
+            throw new InvalidOidcUserException();
+        }
+
+        return fullName;
     }
 }

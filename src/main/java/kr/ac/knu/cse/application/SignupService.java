@@ -8,6 +8,7 @@ import kr.ac.knu.cse.domain.student.Student;
 import kr.ac.knu.cse.domain.student.StudentRepository;
 import kr.ac.knu.cse.global.exception.auth.AlreadySignedUpException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +37,12 @@ public class SignupService {
                 command.providerKey(),
                 student.getId()
         );
-        providerRepository.save(provider);
+
+        try {
+            providerRepository.save(provider);
+        } catch (DataIntegrityViolationException e) {
+            throw new AlreadySignedUpException();
+        }
 
         return new SignupResponse(student.getId());
     }

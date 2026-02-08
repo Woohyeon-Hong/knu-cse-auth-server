@@ -2,18 +2,25 @@ package kr.ac.knu.cse.infrastructure.security.filter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import kr.ac.knu.cse.global.exception.BusinessException;
 import kr.ac.knu.cse.global.exception.auth.AccountDisabledException;
 import kr.ac.knu.cse.global.exception.auth.InvalidOAuthClientException;
 import kr.ac.knu.cse.global.exception.auth.InvalidOidcUserException;
 import kr.ac.knu.cse.global.exception.auth.UnauthorizedOAuthClientException;
 import kr.ac.knu.cse.global.exception.common.InternalServerErrorException;
+import kr.ac.knu.cse.infrastructure.security.support.FilterBusinessExceptionWriter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
+@Profile("!test")
 @Component
+@RequiredArgsConstructor
 public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
 
     private final static String ACCESS_DENIED = "access_denied";
@@ -21,16 +28,18 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
     private final static String INVALID_CLIENT = "invalid_client";
     private final static String UNAUTHORIZED_CLIENT = "unauthorized_client";
 
+    private final FilterBusinessExceptionWriter filterBusinessExceptionWriter;
+
     @Override
     public void onAuthenticationFailure(
             HttpServletRequest request,
             HttpServletResponse response,
             AuthenticationException exception
-    ) {
-        throw translate(exception);
+    ) throws IOException {
+        filterBusinessExceptionWriter.write(response, translate(exception));
     }
 
-    private RuntimeException translate(AuthenticationException ex) {
+    private BusinessException translate(AuthenticationException ex) {
         if (ex instanceof OAuth2AuthenticationException oauthEx) {
             return handleOAuth2Exception(oauthEx);
         }
@@ -38,7 +47,7 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
         return new InternalServerErrorException();
     }
 
-    private RuntimeException handleOAuth2Exception(
+    private BusinessException handleOAuth2Exception(
             OAuth2AuthenticationException ex
     ) {
         OAuth2Error error = ex.getError();
@@ -63,5 +72,4 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
 
         return new InternalServerErrorException();
     }
-
 }

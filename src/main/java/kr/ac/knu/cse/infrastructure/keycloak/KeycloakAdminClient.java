@@ -18,41 +18,6 @@ public class KeycloakAdminClient {
     private final KeycloakAdminTokenClient tokenClient;
     private final KeycloakExceptionTranslator exceptionTranslator;
 
-    public void upsertStudentIdAttribute(String keycloakUserId, Long studentId) {
-        String token = tokenClient.getAdminAccessToken();
-
-        try {
-            Map<String, Object> payload = createAttributes(studentId);
-            requestUpdateOfToken(keycloakUserId, token, payload);
-        } catch (Exception e) {
-            throw exceptionTranslator.translate(e);
-        }
-    }
-
-    private Map<String, Object> createAttributes(Long studentId) {
-        return Map.of(
-                "attributes", Map.of(
-                        "studentId", List.of(String.valueOf(studentId))
-                )
-        );
-    }
-
-    private void requestUpdateOfToken(
-            String keycloakUserId,
-            String token,
-            Map<String, Object> payload) {
-
-        keycloakRestClient.put()
-                .uri(keycloakAdminProperties.baseUrl()
-                        + "/admin/realms/" + keycloakAdminProperties.realm()
-                        + "/users/" + keycloakUserId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .headers(h -> h.setBearerAuth(token))
-                .body(payload)
-                .retrieve()
-                .toBodilessEntity();
-    }
-
     public void updateRoleInKeycloak(String keycloakUserId, String roleName) {
         String token = tokenClient.getAdminAccessToken();
 
@@ -69,9 +34,10 @@ public class KeycloakAdminClient {
 
     private Map<String, Object> requestOriginalRole(String roleName, String token) {
         return keycloakRestClient.get()
-                .uri(keycloakAdminProperties.baseUrl()
-                        + "/admin/realms/" + keycloakAdminProperties.realm()
-                        + "/roles/" + roleName)
+                .uri(uriBuilder -> uriBuilder
+                        .pathSegment("admin", "realms", keycloakAdminProperties.realm(), "roles", roleName)
+                        .build()
+                )
                 .headers(h -> h.setBearerAuth(token))
                 .retrieve()
                 .body(Map.class);

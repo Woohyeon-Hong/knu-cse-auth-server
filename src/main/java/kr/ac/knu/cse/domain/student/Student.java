@@ -111,11 +111,7 @@ public class Student extends BaseTimeEntity {
         this.role = role;
     }
 
-    public void revokeToUser() {
-        this.role = ROLE_USER;
-    }
-
-    public void promoteGrade() {
-        this.grade = grade.promote();
+    public void setIdForTest(Long id) {
+        this.id = id;
     }
 }

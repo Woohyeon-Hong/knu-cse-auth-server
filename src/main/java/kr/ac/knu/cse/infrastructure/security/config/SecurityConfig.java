@@ -8,6 +8,7 @@ import kr.ac.knu.cse.infrastructure.security.filter.OAuth2LoginFailureHandler;
 import kr.ac.knu.cse.infrastructure.security.filter.OAuth2LoginSuccessHandler;
 import kr.ac.knu.cse.infrastructure.security.filter.OAuth2LogoutSuccessHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -30,13 +31,15 @@ public class SecurityConfig {
     private final OAuth2AuthorizationRequestResolver authorizationRequestResolver;
     private final InternalApiKeyFilter internalApiKeyFilter;
 
+    @Value("${spring.profiles.active:}")
+    private String activeProfile;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())    //local
 
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(endpoint -> endpoint
@@ -53,15 +56,10 @@ public class SecurityConfig {
                         .clearAuthentication(true)
                 )
 
-                //local
-                .headers(headers -> headers
-                        .frameOptions(FrameOptionsConfig::disable)
-                )
-
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/internal/**").permitAll()
                         .requestMatchers(GET, "/login/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()  //local
+                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers(POST, "/logout/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -70,6 +68,14 @@ public class SecurityConfig {
                         internalApiKeyFilter,
                         UsernamePasswordAuthenticationFilter.class
                 );
+
+        if (activeProfile.contains("local")) {
+            http
+                    .headers(headers ->
+                            headers.frameOptions(FrameOptionsConfig::disable)
+                    )
+                    .cors(Customizer.withDefaults());
+        }
 
         return http.build();
     }
