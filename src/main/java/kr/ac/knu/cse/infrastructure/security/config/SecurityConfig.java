@@ -8,10 +8,10 @@ import kr.ac.knu.cse.infrastructure.security.filter.OAuth2LoginFailureHandler;
 import kr.ac.knu.cse.infrastructure.security.filter.OAuth2LoginSuccessHandler;
 import kr.ac.knu.cse.infrastructure.security.filter.OAuth2LogoutSuccessHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -30,9 +30,9 @@ public class SecurityConfig {
     private final OAuth2LogoutSuccessHandler logoutSuccessHandler;
     private final OAuth2AuthorizationRequestResolver authorizationRequestResolver;
     private final InternalApiKeyFilter internalApiKeyFilter;
+    private final Environment environment;
 
-    @Value("${spring.profiles.active:}")
-    private String activeProfile;
+    private static final String INTERNAL_PATH_PATTERN = "/internal/**";
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -57,7 +57,7 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/internal/**").permitAll()
+                        .requestMatchers(INTERNAL_PATH_PATTERN).permitAll()
                         .requestMatchers(GET, "/login/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers(POST, "/logout/**").authenticated()
@@ -69,7 +69,7 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 );
 
-        if (activeProfile.contains("local")) {
+        if (environment.matchesProfiles("local")) {
             http
                     .headers(headers ->
                             headers.frameOptions(FrameOptionsConfig::disable)

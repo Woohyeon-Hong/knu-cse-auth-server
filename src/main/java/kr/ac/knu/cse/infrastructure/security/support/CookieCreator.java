@@ -1,35 +1,43 @@
 package kr.ac.knu.cse.infrastructure.security.support;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CookieCreator {
 
-    private static final String COOKIE_ACCESS_TOKEN_NAME = "ACCESS_TOKEN";
-    private static final String COOKIE_PATH_VALUE = "/";
-    private static final int COOKIE_MAX_AGE = 60 * 60;
-    private static final String COOKIE_SAME_SITE_VALUE = "LAX";
-    private static final String HEADER_COOKIE_NAME = "Set-Cookie";
+    @Value("${app.security.cookie.name:ACCESS_TOKEN}")
+    private String cookieAccessTokenName;
+    @Value("${app.security.cookie.path:/}")
+    private String cookiePathValue;
+    @Value("${app.security.cookie.max-age-seconds:3600}")
+    private int cookieMaxAge;
+    @Value("${app.security.cookie.same-site:LAX}")
+    private String cookieSameSiteValue;
+    @Value("${app.security.cookie.http-only:true}")
+    private boolean cookieHttpOnly;
+    @Value("${app.security.cookie.secure:true}")
+    private boolean cookieSecure;
 
     public ResponseCookie createWithValue(String value) {
-        return ResponseCookie.from(COOKIE_ACCESS_TOKEN_NAME, value)
-                .httpOnly(true)
-                .secure(true)
-                .path(COOKIE_PATH_VALUE)
-                .maxAge(COOKIE_MAX_AGE)
-                .sameSite(COOKIE_SAME_SITE_VALUE)
+        return ResponseCookie.from(cookieAccessTokenName, value)
+                .httpOnly(cookieHttpOnly)
+                .secure(cookieSecure)
+                .path(cookiePathValue)
+                .maxAge(cookieMaxAge)
+                .sameSite(cookieSameSiteValue)
                 .build();
     }
 
     public ResponseCookie create() {
-        return ResponseCookie.from(COOKIE_ACCESS_TOKEN_NAME, "value")
-                .httpOnly(true)
-                .secure(true)
-                .path(COOKIE_PATH_VALUE)
+        return ResponseCookie.from(cookieAccessTokenName, "value")
+                .httpOnly(cookieHttpOnly)
+                .secure(cookieSecure)
+                .path(cookiePathValue)
                 .maxAge(0)
-                .sameSite(COOKIE_SAME_SITE_VALUE)
+                .sameSite(cookieSameSiteValue)
                 .build();
     }
 }

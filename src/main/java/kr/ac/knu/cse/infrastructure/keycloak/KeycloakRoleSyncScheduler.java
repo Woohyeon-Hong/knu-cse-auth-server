@@ -16,7 +16,7 @@ public class KeycloakRoleSyncScheduler {
 
     @Scheduled(
             cron = "${app.role-sync.cron}",
-            zone = "Asia/Seoul"
+            zone = "${app.role-sync.zone:Asia/Seoul}"
     )
     public void sync() {
         try {

@@ -1,6 +1,7 @@
 package kr.ac.knu.cse.infrastructure.security.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -14,6 +15,8 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 public class OAuth2LoginConfig {
 
     private final ClientRegistrationRepository clientRegistrationRepository;
+    @Value("${app.oauth2.idp-hint:google}")
+    private String idpHint;
 
     @Bean
     public OAuth2AuthorizationRequestResolver authorizationRequestResolver() {
@@ -25,7 +28,7 @@ public class OAuth2LoginConfig {
 
         resolver.setAuthorizationRequestCustomizer(customizer ->
                 customizer.additionalParameters(params ->
-                        params.put("kc_idp_hint", "google")
+                        params.put("kc_idp_hint", idpHint)
                 )
         );
 
