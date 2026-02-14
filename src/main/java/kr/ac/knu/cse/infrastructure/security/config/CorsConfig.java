@@ -1,6 +1,8 @@
 package kr.ac.knu.cse.infrastructure.security.config;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,18 +11,25 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@Profile("local")
+@Profile("!test")
 @Configuration
 public class CorsConfig {
 
     @Value("${app.frontend.base-url}")
     private String baseUrl;
+    @Value("${app.redirect-allowlist}")
+    private List<String> redirectAllowlist;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(baseUrl));
+        Set<String> allowedOrigins = redirectAllowlist.stream()
+                .map(this::normalizeOrigin)
+                .collect(Collectors.toSet());
+        allowedOrigins.add(normalizeOrigin(baseUrl));
+
+        config.setAllowedOrigins(allowedOrigins.stream().toList());
         config.setAllowedMethods(List.of(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS"
         ));
@@ -32,5 +41,12 @@ public class CorsConfig {
         source.registerCorsConfiguration("/**", config);
 
         return source;
+    }
+
+    private String normalizeOrigin(String origin) {
+        if (origin.endsWith("/")) {
+            return origin.substring(0, origin.length() - 1);
+        }
+        return origin;
     }
 }

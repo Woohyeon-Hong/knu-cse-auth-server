@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.util.StringUtils;
 
 @Profile("!test")
 @Configuration
@@ -27,9 +28,11 @@ public class OAuth2LoginConfig {
                 );
 
         resolver.setAuthorizationRequestCustomizer(customizer ->
-                customizer.additionalParameters(params ->
-                        params.put("kc_idp_hint", idpHint)
-                )
+                customizer.additionalParameters(params -> {
+                    if (StringUtils.hasText(idpHint)) {
+                        params.put("kc_idp_hint", idpHint);
+                    }
+                })
         );
 
         return resolver;

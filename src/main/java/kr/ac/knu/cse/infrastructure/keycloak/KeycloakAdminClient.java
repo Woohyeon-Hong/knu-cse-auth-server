@@ -34,10 +34,9 @@ public class KeycloakAdminClient {
 
     private Map<String, Object> requestOriginalRole(String roleName, String token) {
         return keycloakRestClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .pathSegment("admin", "realms", keycloakAdminProperties.realm(), "roles", roleName)
-                        .build()
-                )
+                .uri(keycloakAdminProperties.baseUrl()
+                        + "/admin/realms/" + keycloakAdminProperties.realm()
+                        + "/roles/" + roleName)
                 .headers(h -> h.setBearerAuth(token))
                 .retrieve()
                 .body(Map.class);
@@ -79,4 +78,3 @@ public class KeycloakAdminClient {
         }
     }
 }
-

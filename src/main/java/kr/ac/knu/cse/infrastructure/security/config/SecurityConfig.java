@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
 
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(endpoint -> endpoint
@@ -74,7 +75,7 @@ public class SecurityConfig {
                     .headers(headers ->
                             headers.frameOptions(FrameOptionsConfig::disable)
                     )
-                    .cors(Customizer.withDefaults());
+            ;
         }
 
         return http.build();
