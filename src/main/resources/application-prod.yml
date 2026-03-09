@@ -1,5 +1,13 @@
 server:
   port: ${AUTH_SERVER_PORT}
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        same-site: lax
+        secure: true
+        http-only: true
+        path: /
 
 spring:
   datasource:
@@ -53,8 +61,6 @@ app:
     cron: ${APP_ROLE_SYNC_CRON}
 
 logging:
-  level:
-    kr.ac.knu.cse: ${APP_LOG_LEVEL:INFO}
-    org.springframework.security: ${SPRING_SECURITY_LOG_LEVEL:INFO}
-    org.springframework.security.oauth2: ${SPRING_SECURITY_OAUTH2_LOG_LEVEL:INFO}
-    org.type.descriptor.sql.BasicBinder: ${SQL_BINDER_LOG_LEVEL:WARN}
+  config: classpath:logback/logback-${spring.profiles.active:prod}.xml
+  file:
+    name: ${LOG_FILE_PATH:./logs/app.log}
